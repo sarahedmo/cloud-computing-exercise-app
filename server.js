@@ -14,6 +14,7 @@ app.use(express.static(__dirname + '/public'));
  ************/
 
 const db = require('./models');
+const BooksModel = require('./models/books');
 
 /**********
  * ROUTES *
@@ -43,11 +44,9 @@ app.get('/api', (req, res) => {
       {method: 'GET', path: '/api/profile', description: 'Data about me'},
       {method: 'GET', path: '/api/books/', description: 'Get All books information'},
       {method: 'POST', path: '/api/books/', description: 'Add a new book'},
-      {method: 'GET', path: '/api/books/:id', description: 'Retrieve single book information'},
-      {method: 'PUT', path: '/api/books/:id', description: 'Update single book information'},
-      {method: 'DELETE', path: '/api/books/:id', description: 'Delete single book information'},
-
-      // TODO: Write other API end-points description here like above
+      {method: 'GET', path: '/api/books/:id', description: 'Retrieve information on a single book'},
+      {method: 'PUT', path: '/api/books/:id', description: 'Update a single book'},
+      {method: 'DELETE', path: '/api/books/:id', description: 'Delete a single book'}
       
     ]
   })
@@ -97,15 +96,15 @@ app.post('/api/books/', (req, res) => {
   /*
    * return the new book information object as json
    */
-  var newBook = new books(
-    title = req.body.title,
-    author = req.body.author,
-    releaseDate = req.body.releaseDate,
-    genre = req.body.genre,
-    rating = req.body.rating,
-    language = req.body.language,
-
-  );
+  var newBook = {
+    title: req.body.title,
+    author: req.body.author,
+    releaseDate: req.body.releaseDate,
+    genre: req.body.genre,
+    rating: req.body.rating,
+    language: req.body.language, 
+  };
+ 
   res.json(newBook);
 });
 
@@ -126,21 +125,21 @@ app.put('/api/books/:id', (req, res) => {
   /*
    * Send the updated book information as a JSON object
    */
-  books.findOneAndUpdate({bookId : req.params.id});
+  books.findByIdAndUpdate(req.params.id, {new: true}, function(err, updatedBookInfo){
+    if (err) throw err;
 
-  /*var updatedBookInfo = newBook(
-    title = req.body.title,
-      author = req.body.author,
-      releaseDate = req.body.releaseDate,
-      genre = req.body.genre,
-      rating = req.body.rating,
-      language = req.body.language,
-
-  );*/
-
-  var updatedBookInfo = bookNewData;
+  var updatedBookInfo = {
+    title: req.body.title,
+    author: req.body.author,
+    releaseDate: req.body.releaseDate,
+    genre: req.body.genre,
+    rating: req.body.rating,
+    language: req.body.language,
+  };
   res.json(updatedBookInfo);
 });
+});
+
 /*
  * Delete a book based upon the specified ID
  */
@@ -153,14 +152,23 @@ app.delete('/api/books/:id', (req, res) => {
    * TODO: use the books model and find using
    * the bookId and delete the book
    */
-  books.findOneAndRemove({bookId : req.params.id});
+  books.findByIdAndRemove(req.params.id, {new: true}, function(err,deletedBook){
+    if (err) throw err;
+
   /*
    * Send the deleted book information as a JSON object
    */
-  var deletedBook = {};
+  var deletedBook = {
+    title: req.body.title,
+    author: req.body.author,
+    releaseDate: req.body.releaseDate,
+    genre: req.body.genre,
+    rating: req.body.rating,
+    language: req.body.language,
+  };
   res.json(deletedBook);
 });
-
+});
 
 /**********
  * SERVER *
